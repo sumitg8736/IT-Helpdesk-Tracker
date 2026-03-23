@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>IT Helpdesk Ticket Tracker</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:        #0d0f12;
+      --surface:   #141720;
+      --surface2:  #1c2030;
+      --border:    #2a2f40;
+      --border2:   #3a4055;
+      --text:      #dde2f0;
+      --muted:     #6b7494;
+      --accent:    #4f8ef7;
+      --accent2:   #7c5af7;
+      --green:     #2dd97a;
+      --yellow:    #f7c94f;
+      --orange:    #f79c4f;
+      --red:       #f74f4f;
+      --radius:    8px;
+      --mono:      'IBM Plex Mono', monospace;
+      --sans:      'IBM Plex Sans', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 14px;
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .logo-icon {
+      width: 32px; height: 32px;
+      background: var(--accent);
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+    }
+    .logo-text {
+      font-family: var(--mono);
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+    .logo-text span { color: var(--accent); }
+    .header-right {
+      display: flex; align-items: center; gap: 12px;
+    }
+    .header-badge {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      border-radius: 4px;
+    }
+
+    /* ── LAYOUT ── */
+    .main-wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 28px 24px;
+    }
+
+    /* ── STATS ROW ── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color .2s;
+    }
+    .stat-card:hover { border-color: var(--border2); }
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+    }
+    .stat-card.all::before  { background: var(--accent); }
+    .stat-card.open::before { background: var(--yellow); }
+    .stat-card.prog::before { background: var(--orange); }
+    .stat-card.done::before { background: var(--green); }
+    .stat-label {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+    .stat-value {
+      font-family: var(--mono);
+      font-size: 32px;
+      font-weight: 600;
+      line-height: 1;
+    }
+    .stat-card.all  .stat-value { color: var(--accent); }
+    .stat-card.open .stat-value { color: var(--yellow); }
+    .stat-card.prog .stat-value { color: var(--orange); }
+    .stat-card.done .stat-value { color: var(--green); }
+    .stat-sub {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    /* ── TOOLBAR ── */
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .search-wrap {
+      flex: 1;
+      min-width: 200px;
+      position: relative;
+    }
+    .search-wrap input {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 13px;
+      padding: 9px 12px 9px 36px;
+      border-radius: var(--radius);
+      outline: none;
+      transition: border-color .2s;
+    }
+    .search-wrap input:focus { border-color: var(--accent); }
+    .search-wrap input::placeholder { color: var(--muted); }
+    .search-icon {
+      position: absolute;
+      left: 11px; top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      font-size: 14px;
+      pointer-events: none;
+    }
+    select, .btn {
+      font-family: var(--sans);
+      font-size: 13px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      padding: 9px 14px;
+      cursor: pointer;
+      outline: none;
+      transition: all .2s;
+    }
+    select {
+      background: var(--surface);
+      color: var(--text);
+    }
+    select:focus { border-color: var(--accent); }
+    .btn {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+      font-weight: 600;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .btn:hover { background: #3a7ae8; border-color: #3a7ae8; }
+    .btn-ghost {
+      background: var(--surface);
+      color: var(--text);
+      border-color: var(--border);
+      font-weight: 400;
+    }
+    .btn-ghost:hover { border-color: var(--border2); background: var(--surface2); }
+
+    /* ── TABLE ── */
+    .table-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      background: var(--surface2);
+      font-family: var(--mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background .15s;
+      cursor: pointer;
+    }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: var(--surface2); }
+    td {
+      padding: 13px 16px;
+      vertical-align: middle;
+    }
+    .ticket-id {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .ticket-title {
+      font-weight: 500;
+      font-size: 14px;
+    }
+    .ticket-cat {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+    /* priority badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 500;
+      padding: 3px 9px;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+    .badge::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+    .p-low      { color: var(--green);  background: rgba(45,217,122,.12); }
+    .p-medium   { color: var(--yellow); background: rgba(247,201,79,.12); }
+    .p-high     { color: var(--orange); background: rgba(247,156,79,.12); }
+    .p-critical { color: var(--red);    background: rgba(247,79,79,.12);  }
+
+    .s-open       { color: var(--yellow); background: rgba(247,201,79,.12); }
+    .s-inprogress { color: var(--accent); background: rgba(79,142,247,.12); }
+    .s-resolved   { color: var(--green);  background: rgba(45,217,122,.12); }
+    .s-closed     { color: var(--muted);  background: rgba(107,116,148,.12);}
+
+    .action-btns { display: flex; gap: 6px; }
+    .icon-btn {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      color: var(--muted);
+      width: 28px; height: 28px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all .15s;
+    }
+    .icon-btn:hover { color: var(--text); border-color: var(--border2); }
+    .icon-btn.del:hover { color: var(--red); border-color: var(--red); }
+
+    .empty-state {
+      padding: 60px 20px;
+      text-align: center;
+      color: var(--muted);
+    }
+    .empty-state .emoji { font-size: 36px; margin-bottom: 12px; }
+    .empty-state p { font-family: var(--mono); font-size: 13px; }
+
+    /* ── MODAL ── */
+    .overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.65);
+      z-index: 200;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none;
+      transition: opacity .2s;
+    }
+    .overlay.active { opacity: 1; pointer-events: all; }
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 12px;
+      width: 540px;
+      max-width: 95vw;
+      max-height: 90vh;
+      overflow-y: auto;
+      transform: translateY(16px) scale(.97);
+      transition: transform .2s;
+    }
+    .overlay.active .modal { transform: translateY(0) scale(1); }
+    .modal-header {
+      padding: 20px 24px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .modal-title {
+      font-family: var(--mono);
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .modal-close {
+      background: none; border: none;
+      color: var(--muted); font-size: 18px;
+      cursor: pointer; line-height: 1;
+      transition: color .15s;
+    }
+    .modal-close:hover { color: var(--text); }
+    .modal-body { padding: 20px 24px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group.full { grid-column: 1 / -1; }
+    label {
+      font-family: var(--mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      color: var(--muted);
+    }
+    input[type=text], textarea, .form-group select {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 14px;
+      padding: 10px 12px;
+      border-radius: var(--radius);
+      outline: none;
+      transition: border-color .2s;
+      width: 100%;
+    }
+    input[type=text]:focus,
+    textarea:focus,
+    .form-group select:focus { border-color: var(--accent); }
+    textarea { resize: vertical; min-height: 80px; }
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border);
+      display: flex; justify-content: flex-end; gap: 10px;
+    }
+
+    /* ── DETAIL MODAL ── */
+    .detail-row { display: flex; flex-direction: column; gap: 4px; margin-bottom: 16px; }
+    .detail-label { font-family: var(--mono); font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; }
+    .detail-val { font-size: 14px; line-height: 1.5; }
+    .detail-badges { display: flex; gap: 8px; flex-wrap: wrap; }
+    .status-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+    .status-pick {
+      font-family: var(--mono);
+      font-size: 12px;
+      padding: 6px 14px;
+      border-radius: 5px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--text);
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .status-pick:hover { border-color: var(--accent); color: var(--accent); }
+    .status-pick.active { border-color: var(--accent); background: rgba(79,142,247,.15); color: var(--accent); }
+
+    /* scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+    /* ── TOAST ── */
+    #toast {
+      position: fixed;
+      bottom: 24px; right: 24px;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 13px;
+      padding: 12px 18px;
+      border-radius: 8px;
+      transform: translateY(60px);
+      opacity: 0;
+      transition: all .3s;
+      z-index: 999;
+      pointer-events: none;
+    }
+    #toast.show { transform: translateY(0); opacity: 1; }
+    #toast.success { border-left: 3px solid var(--green); }
+    #toast.error   { border-left: 3px solid var(--red); }
+    #toast.info    { border-left: 3px solid var(--accent); }
+
+    @media (max-width: 700px) {
+      .stats-row { grid-template-columns: repeat(2,1fr); }
+      .form-grid { grid-template-columns: 1fr; }
+      thead th:nth-child(4),
+      td:nth-child(4) { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">🖥️</div>
+    <span class="logo-text"><span>IT</span> Helpdesk Tracker</span>
+  </div>
+  <div class="header-right">
+    <span class="header-badge" id="headerDate"></span>
+    <span class="header-badge">v1.0.0</span>
+  </div>
+</header>
+
+<div class="main-wrap">
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-card all">
+      <div class="stat-label">Total Tickets</div>
+      <div class="stat-value" id="s-total">0</div>
+      <div class="stat-sub">All time</div>
+    </div>
+    <div class="stat-card open">
+      <div class="stat-label">Open</div>
+      <div class="stat-value" id="s-open">0</div>
+      <div class="stat-sub">Awaiting action</div>
+    </div>
+    <div class="stat-card prog">
+      <div class="stat-label">In Progress</div>
+      <div class="stat-value" id="s-prog">0</div>
+      <div class="stat-sub">Being worked on</div>
+    </div>
+    <div class="stat-card done">
+      <div class="stat-label">Resolved</div>
+      <div class="stat-value" id="s-done">0</div>
+      <div class="stat-sub">Closed / resolved</div>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="Search tickets by title, ID, or category…" oninput="renderTable()"/>
+    </div>
+    <select id="filterStatus" onchange="renderTable()">
+      <option value="">All Status</option>
+      <option value="Open">Open</option>
+      <option value="In Progress">In Progress</option>
+      <option value="Resolved">Resolved</option>
+      <option value="Closed">Closed</option>
+    </select>
+    <select id="filterPriority" onchange="renderTable()">
+      <option value="">All Priority</option>
+      <option value="Low">Low</option>
+      <option value="Medium">Medium</option>
+      <option value="High">High</option>
+      <option value="Critical">Critical</option>
+    </select>
+    <button class="btn" onclick="openCreateModal()">＋ New Ticket</button>
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Ticket ID</th>
+          <th>Title / Category</th>
+          <th>Priority</th>
+          <th>Status</th>
+          <th>Created</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="ticketTable"></tbody>
+    </table>
+    <div class="empty-state" id="emptyState" style="display:none">
+      <div class="emoji">📋</div>
+      <p>No tickets found. Create one to get started.</p>
+    </div>
+  </div>
+</div>
+
+<!-- CREATE / EDIT MODAL -->
+<div class="overlay" id="formOverlay" onclick="overlayClick(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="formTitle">NEW TICKET</span>
+      <button class="modal-close" onclick="closeModal('formOverlay')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group full">
+          <label>Ticket Title *</label>
+          <input type="text" id="f-title" placeholder="e.g. VPN not connecting on laptop"/>
+        </div>
+        <div class="form-group full">
+          <label>Description</label>
+          <textarea id="f-desc" placeholder="Describe the issue in detail…"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Category</label>
+          <select id="f-cat">
+            <option>Hardware</option>
+            <option>Software</option>
+            <option>Network</option>
+            <option>Access / Permissions</option>
+            <option>Email</option>
+            <option>Printer</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Priority</label>
+          <select id="f-priority">
+            <option>Low</option>
+            <option>Medium</option>
+            <option>High</option>
+            <option>Critical</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select id="f-status">
+            <option>Open</option>
+            <option>In Progress</option>
+            <option>Resolved</option>
+            <option>Closed</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Assigned To</label>
+          <input type="text" id="f-assigned" placeholder="e.g. John D."/>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('formOverlay')">Cancel</button>
+      <button class="btn" onclick="saveTicket()">💾 Save Ticket</button>
+    </div>
+  </div>
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="overlay" id="detailOverlay" onclick="overlayClick(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="d-id">TICKET #0000</span>
+      <button class="modal-close" onclick="closeModal('detailOverlay')">✕</button>
+    </div>
+    <div class="modal-body" id="detailBody"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('detailOverlay')">Close</button>
+      <button class="btn" id="d-edit-btn" onclick="editFromDetail()">✏️ Edit</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+  // ── DATA ──
+  let tickets = JSON.parse(localStorage.getItem('hd_tickets') || '[]');
+  let editingId = null;
+  let detailId  = null;
+  let idCounter = parseInt(localStorage.getItem('hd_counter') || '1000');
+
+  // Seed data if empty
+  if (!tickets.length) {
+    const seed = [
+      { title:'VPN not connecting on remote laptop', desc:'User unable to connect to corporate VPN since morning. Error code 800.', cat:'Network',   priority:'High',     status:'Open',        assigned:'Priya M.',  created: dateStr(-2) },
+      { title:'Outlook not syncing emails',          desc:'New emails not appearing. Last sync was 2 days ago.',                  cat:'Email',     priority:'Medium',   status:'In Progress', assigned:'Raj S.',    created: dateStr(-1) },
+      { title:'Printer offline on 3rd floor',        desc:'HP LaserJet 402 showing offline. Restart did not help.',               cat:'Printer',   priority:'Medium',   status:'Open',        assigned:'',          created: dateStr(-3) },
+      { title:'New employee laptop setup',           desc:'Provision laptop for new joiner joining Monday.',                      cat:'Hardware',  priority:'High',     status:'Resolved',    assigned:'Amit K.',   created: dateStr(-5) },
+      { title:'Access denied to shared drive',       desc:'User cannot access \\\\server\\Finance folder despite permissions.',   cat:'Access / Permissions', priority:'Critical', status:'Open', assigned:'Priya M.', created: dateStr(-1) },
+      { title:'Browser crashes on specific website', desc:'Chrome crashes when opening internal HR portal.',                      cat:'Software',  priority:'Low',      status:'Closed',      assigned:'Raj S.',    created: dateStr(-7) },
+    ];
+    seed.forEach(s => {
+      tickets.push({ id: ++idCounter, ...s });
+    });
+    save();
+  }
+
+  function dateStr(offsetDays = 0) {
+    const d = new Date();
+    d.setDate(d.getDate() + offsetDays);
+    return d.toISOString().split('T')[0];
+  }
+
+  function save() {
+    localStorage.setItem('hd_tickets', JSON.stringify(tickets));
+    localStorage.setItem('hd_counter', idCounter);
+    renderStats();
+  }
+
+  // ── STATS ──
+  function renderStats() {
+    document.getElementById('s-total').textContent = tickets.length;
+    document.getElementById('s-open').textContent  = tickets.filter(t => t.status === 'Open').length;
+    document.getElementById('s-prog').textContent  = tickets.filter(t => t.status === 'In Progress').length;
+    document.getElementById('s-done').textContent  = tickets.filter(t => t.status === 'Resolved' || t.status === 'Closed').length;
+  }
+
+  // ── RENDER TABLE ──
+  function renderTable() {
+    const q  = document.getElementById('searchInput').value.toLowerCase();
+    const fs = document.getElementById('filterStatus').value;
+    const fp = document.getElementById('filterPriority').value;
+    const tbody = document.getElementById('ticketTable');
+    const empty = document.getElementById('emptyState');
+
+    let filtered = tickets.filter(t => {
+      const matchQ  = !q || t.title.toLowerCase().includes(q) || t.cat.toLowerCase().includes(q) || ('#' + t.id).includes(q);
+      const matchS  = !fs || t.status === fs;
+      const matchP  = !fp || t.priority === fp;
+      return matchQ && matchS && matchP;
+    }).sort((a,b) => b.id - a.id);
+
+    if (!filtered.length) {
+      tbody.innerHTML = '';
+      empty.style.display = 'block';
+      return;
+    }
+    empty.style.display = 'none';
+
+    tbody.innerHTML = filtered.map(t => `
+      <tr onclick="openDetail(${t.id})">
+        <td><span class="ticket-id">#${t.id}</span></td>
+        <td>
+          <div class="ticket-title">${esc(t.title)}</div>
+          <div class="ticket-cat">${esc(t.cat)}</div>
+        </td>
+        <td><span class="badge ${pClass(t.priority)}">${t.priority}</span></td>
+        <td><span class="badge ${sClass(t.status)}">${t.status}</span></td>
+        <td style="color:var(--muted);font-family:var(--mono);font-size:12px">${t.created}</td>
+        <td onclick="event.stopPropagation()">
+          <div class="action-btns">
+            <div class="icon-btn" title="Edit" onclick="openEditModal(${t.id})">✏️</div>
+            <div class="icon-btn del" title="Delete" onclick="deleteTicket(${t.id})">🗑️</div>
+          </div>
+        </td>
+      </tr>`).join('');
+  }
+
+  function pClass(p) {
+    return { Low:'p-low', Medium:'p-medium', High:'p-high', Critical:'p-critical' }[p] || 'p-low';
+  }
+  function sClass(s) {
+    return { Open:'s-open', 'In Progress':'s-inprogress', Resolved:'s-resolved', Closed:'s-closed' }[s] || 's-open';
+  }
+  function esc(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // ── CREATE MODAL ──
+  function openCreateModal() {
+    editingId = null;
+    document.getElementById('formTitle').textContent = 'NEW TICKET';
+    document.getElementById('f-title').value    = '';
+    document.getElementById('f-desc').value     = '';
+    document.getElementById('f-cat').value      = 'Hardware';
+    document.getElementById('f-priority').value = 'Medium';
+    document.getElementById('f-status').value   = 'Open';
+    document.getElementById('f-assigned').value = '';
+    document.getElementById('formOverlay').classList.add('active');
+  }
+
+  function openEditModal(id) {
+    const t = tickets.find(x => x.id === id);
+    if (!t) return;
+    editingId = id;
+    document.getElementById('formTitle').textContent = `EDIT TICKET #${id}`;
+    document.getElementById('f-title').value    = t.title;
+    document.getElementById('f-desc').value     = t.desc || '';
+    document.getElementById('f-cat').value      = t.cat;
+    document.getElementById('f-priority').value = t.priority;
+    document.getElementById('f-status').value   = t.status;
+    document.getElementById('f-assigned').value = t.assigned || '';
+    document.getElementById('formOverlay').classList.add('active');
+  }
+
+  function saveTicket() {
+    const title = document.getElementById('f-title').value.trim();
+    if (!title) { toast('Title is required!', 'error'); return; }
+    if (editingId) {
+      const t = tickets.find(x => x.id === editingId);
+      t.title    = title;
+      t.desc     = document.getElementById('f-desc').value.trim();
+      t.cat      = document.getElementById('f-cat').value;
+      t.priority = document.getElementById('f-priority').value;
+      t.status   = document.getElementById('f-status').value;
+      t.assigned = document.getElementById('f-assigned').value.trim();
+      toast('Ticket updated ✓', 'success');
+    } else {
+      tickets.push({
+        id:       ++idCounter,
+        title,
+        desc:     document.getElementById('f-desc').value.trim(),
+        cat:      document.getElementById('f-cat').value,
+        priority: document.getElementById('f-priority').value,
+        status:   document.getElementById('f-status').value,
+        assigned: document.getElementById('f-assigned').value.trim(),
+        created:  dateStr(0),
+      });
+      toast('New ticket created ✓', 'success');
+    }
+    save();
+    renderTable();
+    closeModal('formOverlay');
+  }
+
+  function deleteTicket(id) {
+    if (!confirm('Delete this ticket?')) return;
+    tickets = tickets.filter(t => t.id !== id);
+    save();
+    renderTable();
+    toast('Ticket deleted', 'info');
+  }
+
+  // ── DETAIL MODAL ──
+  function openDetail(id) {
+    const t = tickets.find(x => x.id === id);
+    if (!t) return;
+    detailId = id;
+    document.getElementById('d-id').textContent = `TICKET #${t.id}`;
+    const statuses = ['Open','In Progress','Resolved','Closed'];
+    document.getElementById('detailBody').innerHTML = `
+      <div class="detail-row">
+        <div class="detail-label">Title</div>
+        <div class="detail-val" style="font-size:16px;font-weight:600">${esc(t.title)}</div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-label">Description</div>
+        <div class="detail-val" style="color:var(--muted)">${t.desc ? esc(t.desc) : '—'}</div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-label">Badges</div>
+        <div class="detail-badges">
+          <span class="badge ${pClass(t.priority)}">${t.priority}</span>
+          <span class="badge ${sClass(t.status)}">${t.status}</span>
+          <span class="badge" style="color:var(--muted);background:var(--surface2)">${esc(t.cat)}</span>
+        </div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-label">Assigned To</div>
+        <div class="detail-val">${t.assigned || '—'}</div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-label">Created</div>
+        <div class="detail-val" style="font-family:var(--mono);font-size:12px">${t.created}</div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-label">Update Status</div>
+        <div class="status-btns">
+          ${statuses.map(s => `<button class="status-pick ${t.status===s?'active':''}" onclick="quickStatus(${t.id},'${s}')">${s}</button>`).join('')}
+        </div>
+      </div>`;
+    document.getElementById('detailOverlay').classList.add('active');
+  }
+
+  function quickStatus(id, status) {
+    const t = tickets.find(x => x.id === id);
+    if (!t) return;
+    t.status = status;
+    save();
+    renderTable();
+    openDetail(id); // re-render detail
+    toast(`Status → ${status}`, 'success');
+  }
+
+  function editFromDetail() {
+    closeModal('detailOverlay');
+    setTimeout(() => openEditModal(detailId), 150);
+  }
+
+  // ── MODAL HELPERS ──
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('active');
+  }
+  function overlayClick(e) {
+    if (e.target.classList.contains('overlay')) closeModal(e.target.id);
+  }
+
+  // ── TOAST ──
+  let toastTimer;
+  function toast(msg, type='info') {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.className = `show ${type}`;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { el.className = ''; }, 2500);
+  }
+
+  // ── INIT ──
+  document.getElementById('headerDate').textContent = new Date().toLocaleDateString('en-IN',{weekday:'short',year:'numeric',month:'short',day:'numeric'});
+  renderStats();
+  renderTable();
+</script>
+</body>
+</html>
