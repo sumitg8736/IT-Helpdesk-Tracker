@@ -26,7 +26,7 @@ A fully functional IT support ticket management system built with **HTML, CSS, a
 
 ## 💼 Real-World Relevance
 
-This project mirrors tools used in **IT Support roles at companies like Cognizant**, where:
+This project mirrors tools used in **IT Support roles at companies, where:
 - Tickets are raised for hardware/software/network issues
 - Engineers update ticket status as they work through resolutions
 - Priority levels determine response SLAs
