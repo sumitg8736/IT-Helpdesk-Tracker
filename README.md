@@ -3,7 +3,7 @@
 A fully functional IT support ticket management system built with **HTML, CSS, and vanilla JavaScript** — no frameworks, no dependencies.
 
 ## 🚀 Live Demo
-> [Add your GitHub Pages link here after deployment]
+> https://github.com/sumitg8736/IT-Helpdesk-Tracker
 
 ## 📋 Features
 
@@ -26,7 +26,7 @@ A fully functional IT support ticket management system built with **HTML, CSS, a
 
 ## 💼 Real-World Relevance
 
-This project mirrors tools used in **IT Support roles at companies, where:
+This project mirrors tools used in **IT Support roles** at companies, where:
 - Tickets are raised for hardware/software/network issues
 - Engineers update ticket status as they work through resolutions
 - Priority levels determine response SLAs
@@ -50,7 +50,7 @@ it-helpdesk-tracker/
 1. Push this folder to a GitHub repository
 2. Go to **Settings → Pages**
 3. Set source to `main` branch, `/ (root)` folder
-4. Your live URL will be: `https://yourusername.github.io/it-helpdesk-tracker`
+4. Your live URL will be: `https://github.com/sumitg8736/IT-Helpdesk-Tracker`
 
 ---
 
