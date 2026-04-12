@@ -34,6 +34,7 @@ This project mirrors tools used in **IT Support roles** at companies, where:
 
 ## 📁 Project Structure
 
+
 ```
 it-helpdesk-tracker/
 └── index.html      ← Single-file app (HTML + CSS + JS)
